@@ -113,7 +113,26 @@ fn main() -> Result<()> {
     }
 
     let model_path = args.model.to_string_lossy().to_string();
-    let ctx = WhisperContext::new_with_params(&model_path, ctx_params).context("load model")?;
+
+    if args.gpu {
+        eprintln!("ℹ️  Tentative d'utilisation du GPU (device {})...", args.gpu_device);
+    }
+
+    let ctx = WhisperContext::new_with_params(&model_path, ctx_params)
+        .map_err(|e| {
+            if args.gpu {
+                eprintln!("⚠️  Erreur chargement modèle avec GPU - vérifier GPU disponible et compilé");
+                eprintln!("   Erreur: {}", e);
+                anyhow::anyhow!("Impossible charger modèle avec GPU. GPU {} absent ou non compilé? Erreur: {}", args.gpu_device, e)
+            } else {
+                anyhow::anyhow!("Impossible charger modèle: {}", e)
+            }
+        })?;
+
+    if args.gpu {
+        eprintln!("✓ Modèle chargé avec GPU");
+    }
+
     let mut state = ctx.create_state().context("create_state")?;
 
     // Utilise BeamSearch pour une meilleure qualité
