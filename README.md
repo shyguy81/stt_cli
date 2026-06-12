@@ -55,6 +55,8 @@ Options principales :
 - `--m4a <path>` : fichier audio d'entrée (.m4a / AAC)
 - `--lang <code>` : code langue (fr, en, ...). Chaîne vide => détection automatique
 - `--threads <n>` : nombre de threads pour Whisper (0 = valeur par défaut de la lib)
+- `--json` : sortie structurée pour automatisation / LLM
+- `--gpu` et `--gpu-device <n>` : inférence GPU si le binaire est compilé avec un backend GPU
 
 Exemple avec threads :
 
@@ -62,9 +64,23 @@ Exemple avec threads :
 ./target/release/stt_cli --model ./models/ggml-base.bin --m4a ./audio/sample.m4a --lang en --threads 8
 ```
 
+Installer le binaire pour l'utilisateur courant :
+
+```bash
+bash scripts/install_user.sh
+```
+
+Compiler et installer avec CUDA :
+
+```bash
+bash scripts/install_user.sh --features cuda
+```
+
 ## Sortie
 
 Le programme affiche la transcription, segment par segment (une ligne par segment) sur stdout.
+
+Avec `--json`, il produit un objet contenant `text`, `segments[]` avec timestamps en millisecondes, et `metadata`.
 
 ## Notes techniques
 
@@ -112,11 +128,9 @@ Il n'y a pas de suite de tests automatisés dans le projet. Pour valider vos mod
 
 ## Améliorations fréquentes
 
-- Ajouter une option pour sortir en JSON (sérialiser via `serde_json`).
 - Exposer des options de resampling / performance (taille de buffer, GPU flag) via la CLI.
 - Ajouter du logging (`log` + `env_logger`) et remplacer les `println!` par `info!`/`debug!`.
 
 ---
 
 Si vous voulez, j'ajoute une option pour écrire la sortie en JSON ou j'ajoute des exemples d'utilisation supplémentaires.
-

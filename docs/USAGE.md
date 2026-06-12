@@ -24,19 +24,30 @@ cargo run --release -- --model ./ggml-base.bin --m4a ./audio.m4a --lang fr
 cargo run --release -- --model ./ggml-base.bin --m4a ./audio.m4a --lang fr --output out.txt
 ```
 
+**Sortie JSON pour automatisation / LLM**
+
+```bash
+cargo run --release -- --model ./ggml-base.bin --m4a ./audio.m4a --lang fr --json
+```
+
 **Options CLI importantes**
 - `--model <path>` : chemin vers le fichier ggml (obligatoire)
 - `--m4a <path>` : fichier audio d'entrée (obligatoire)
 - `--lang <code>` : langue (ex: `fr`). Chaîne vide => auto-détection
 - `--threads <n>` : nombre de threads pour `whisper` (0 => valeur par défaut de la lib)
+- `--gpu` : active l'inférence GPU si le binaire a été compilé avec une feature GPU
+- `--gpu-device <n>` : index du GPU à utiliser avec `--gpu`
 - `--beam-size <n>` : largeur de BeamSearch (par défaut 5). Valeurs plus grandes peuvent améliorer la qualité au prix du temps CPU.
 - `--temperature <f>` : température d'échantillonnage (0.0 par défaut). >0 favorise diversité.
 - `--initial-prompt <text>` : prompt initial pour guider la transcription (utile pour domaine/sujet spécifique)
 - `--output <path>` : écrire la transcription dans un fichier texte au lieu de stdout
+- `--json` : produire une sortie JSON stable avec texte complet, segments et métadonnées
 
 **Format de sortie**
 - Par défaut, la CLI affiche chaque segment (nettoyé des blancs) sur stdout.
 - Avec `--output`, le fichier contiendra la transcription complète, segments séparés par des retours à la ligne.
+- Avec `--json`, la sortie contient `text`, `segments[]` (`index`, `start_ms`, `end_ms`, `text`) et `metadata`.
+- Avec `--json --output out.json`, le fichier contiendra le JSON au lieu du texte brut.
 
 **Modèles (où les obtenir)**
 - Modèles officiels/communautaires (ex: ggerganov/whisper.cpp) — télécharger manuellement et placer le `.bin` à côté du binaire, ex `./ggml-base.bin`.
@@ -60,7 +71,6 @@ wget -c -O ggml-base.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/ma
 - Erreurs liées au resampler: tester avec `sr_in == 16_000` pour bypasser le resampling.
 
 **Pour aller plus loin**
-- Ajouter option `--json` pour exporter segments + timestamps (peut être ajouté si souhaité).
 - Exposer options de resampling (chunk_size, sub_chunks) via CLI si vous avez des cas d'usage spécifiques.
 
 ---

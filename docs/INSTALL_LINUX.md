@@ -26,6 +26,40 @@ Le binaire optimisé sera créé dans `target/release/stt_cli`.
 
 ## 3 — Installer le binaire et les ressources
 
+### Installation utilisateur, sans sudo
+
+Le dépôt fournit un script de déploiement local vers `~/.local/bin` :
+
+```bash
+bash scripts/install_user.sh
+```
+
+Le script compile en release, crée `~/.local/bin` si nécessaire, puis installe :
+
+```text
+~/.local/bin/stt_cli
+```
+
+Si `~/.local/bin` n'est pas dans votre `PATH`, ajoutez ceci à votre profil shell :
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Pour compiler avec un backend GPU, passez les features Cargo :
+
+```bash
+bash scripts/install_user.sh --features cuda
+```
+
+Vous pouvez aussi choisir un autre répertoire utilisateur :
+
+```bash
+bash scripts/install_user.sh --bin-dir "$HOME/bin"
+```
+
+### Installation système, avec sudo
+
 Conseil d'arborescence :
 
 - Binaire : `/usr/local/bin/stt_cli`
@@ -51,6 +85,8 @@ stt_cli --model /opt/stt_cli/models/ggml-base.bin --m4a /opt/stt_cli/audio/sampl
 ```
 
 Si `stt_cli` n'est pas trouvé, vérifiez que `/usr/local/bin` est dans votre `PATH`.
+
+Pour l'installation utilisateur, vérifiez plutôt que `~/.local/bin` est dans votre `PATH`.
 
 ## 5 — Service systemd (optionnel)
 
@@ -101,13 +137,10 @@ Le paquet `.deb` résultant peut être installé sur d'autres machines avec `dpk
 
 ## 8 — Notes pratiques
 
-- Préférez `/usr/local/bin` pour un binaire global et `/opt/stt_cli` pour les ressources.
-- Pour automatisation: un script shell qui copie les modèles et installe le binaire facilite le déploiement.
+- Préférez `~/.local/bin` pour un binaire utilisateur sans sudo.
+- Préférez `/usr/local/bin` pour un binaire global et `/opt/stt_cli` pour les ressources partagées.
+- Pour automatisation: `scripts/install_user.sh` assure le déploiement local du binaire.
 
 ---
 
-Fichier créé pour déploiement rapide. Si vous voulez, je peux :
-
-- fournir un script d'installation (`install.sh`) automatisé,
-- créer une unité `systemd` plus avancée pour surveiller un répertoire,
-- générer un paquet `.deb` configuré avec dépendances.
+Fichier créé pour déploiement rapide. Pour aller plus loin, vous pouvez ajouter une unité `systemd` plus avancée ou générer un paquet `.deb` configuré avec dépendances.

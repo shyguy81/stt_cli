@@ -26,8 +26,11 @@ cp README.md "$TMP/" || true
 cp docs/USAGE.md "$TMP/" || true
 cp Cargo.toml "$TMP/" || true
 cp LICENSE "$TMP/" || true
+mkdir -p "$TMP/scripts"
+cp scripts/install_user.sh "$TMP/scripts/" || true
 
 chmod +x "$TMP/stt_cli" || true
+chmod +x "$TMP/scripts/install_user.sh" || true
 
 ARCHIVE_NAME="stt_cli-linux.tar.gz"
 tar -C "$TMP" -czf "$PKG_DIR/$ARCHIVE_NAME" .

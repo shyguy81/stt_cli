@@ -3,9 +3,19 @@ name = "stt_cli"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+default = []
+cuda = ["whisper-rs/cuda"]
+hipblas = ["whisper-rs/hipblas"]
+intel-sycl = ["whisper-rs/intel-sycl"]
+metal = ["whisper-rs/metal"]
+vulkan = ["whisper-rs/vulkan"]
+
 [dependencies]
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
-whisper-rs = "0.15.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+whisper-rs = { version = "0.15.1", default-features = false }
 symphonia = { version = "0.5.4", features = ["isomp4", "aac"] }
 rubato = "0.16.1"
