@@ -24,6 +24,58 @@ Environment:
 EOF
 }
 
+check_gpu_prereqs() {
+  if [[ "$FEATURES" == *cuda* ]]; then
+    if [ -z "${CUDAToolkit_ROOT:-}" ] && [ -d /usr/local/cuda ]; then
+      export CUDAToolkit_ROOT=/usr/local/cuda
+    fi
+
+    if [ -z "${CMAKE_CUDA_COMPILER:-}" ] && [ -x "${CUDAToolkit_ROOT:-}/bin/nvcc" ]; then
+      export CMAKE_CUDA_COMPILER="$CUDAToolkit_ROOT/bin/nvcc"
+    fi
+
+    if [ -z "${CMAKE_CUDA_ARCHITECTURES:-}" ] && command -v lspci >/dev/null 2>&1; then
+      if lspci | grep -Eiq 'GTX 1660|TU116'; then
+        export CMAKE_CUDA_ARCHITECTURES=75
+      fi
+    fi
+
+    if ! command -v nvcc >/dev/null 2>&1 && [ -z "${CUDAToolkit_ROOT:-}" ]; then
+      echo "CUDA feature requested, but CUDA Toolkit was not found." >&2
+      echo "Install the CUDA Toolkit so nvcc is available, or set CUDAToolkit_ROOT." >&2
+      echo "Run scripts/gpu_doctor.sh for a local GPU diagnostic." >&2
+      exit 1
+    fi
+
+    if [ -z "${CMAKE_CUDA_HOST_COMPILER:-}" ] && command -v nvcc >/dev/null 2>&1; then
+      NVCC_VERSION="$(nvcc --version | sed -n 's/.*release \([0-9][0-9]*\).*/\1/p' | head -n 1)"
+      if [ "${NVCC_VERSION:-0}" -le 12 ] && command -v clang-14 >/dev/null 2>&1; then
+        export CMAKE_CUDA_HOST_COMPILER="$(command -v clang-14)"
+      fi
+    fi
+
+    echo "CUDA build configuration:"
+    echo "  CUDAToolkit_ROOT=${CUDAToolkit_ROOT:-<unset>}"
+    echo "  CMAKE_CUDA_COMPILER=${CMAKE_CUDA_COMPILER:-<unset>}"
+    echo "  CMAKE_CUDA_ARCHITECTURES=${CMAKE_CUDA_ARCHITECTURES:-<unset>}"
+    echo "  CMAKE_CUDA_HOST_COMPILER=${CMAKE_CUDA_HOST_COMPILER:-<unset>}"
+  fi
+
+  if [[ "$FEATURES" == *vulkan* ]]; then
+    if ! command -v glslc >/dev/null 2>&1; then
+      echo "Vulkan feature requested, but glslc was not found." >&2
+      echo "Install Vulkan SDK/tools, then run scripts/gpu_doctor.sh again." >&2
+      exit 1
+    fi
+
+    if [ ! -f /usr/include/vulkan/vulkan.h ]; then
+      echo "Vulkan feature requested, but Vulkan headers were not found." >&2
+      echo "Install Vulkan development headers, then run scripts/gpu_doctor.sh again." >&2
+      exit 1
+    fi
+  fi
+}
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --bin-dir)
@@ -61,6 +113,8 @@ done
 cd "$ROOT"
 
 if [ "$BUILD" = true ]; then
+  check_gpu_prereqs
+
   if [ -n "$FEATURES" ]; then
     cargo build --release --features "$FEATURES"
   else

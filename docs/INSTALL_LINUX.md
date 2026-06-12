@@ -52,6 +52,14 @@ Pour compiler avec un backend GPU, passez les features Cargo :
 bash scripts/install_user.sh --features cuda
 ```
 
+Si la compilation GPU échoue, lancez le diagnostic local :
+
+```bash
+bash scripts/gpu_doctor.sh
+```
+
+Pour CUDA, le poste doit avoir un pilote NVIDIA fonctionnel (`nvidia-smi`) et le CUDA Toolkit (`nvcc` ou `CUDAToolkit_ROOT`). Pour Vulkan, il faut les bibliothèques/headers Vulkan et `glslc`.
+
 Vous pouvez aussi choisir un autre répertoire utilisateur :
 
 ```bash
