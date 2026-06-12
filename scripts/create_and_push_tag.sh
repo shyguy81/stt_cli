@@ -44,15 +44,15 @@ else
   fi
 fi
 
-echo "Creating tag: $TAG"
-git tag -a "$TAG" -m "Release $TAG"
-
-# Persist version in VERSION (without leading 'v') and commit the change if any
+# Persist version in Cargo.toml and VERSION (without leading 'v') and commit the change if any
 NEW_VERSION="${TAG#v}"
-echo "$NEW_VERSION" > VERSION
-git add VERSION
+bash scripts/bump_version.sh "$NEW_VERSION"
+git add Cargo.toml Cargo.lock VERSION
 # Commit may fail if there are no changes; allow that without exiting
 git commit -m "Bump version to ${NEW_VERSION}" || true
+
+echo "Creating tag: $TAG"
+git tag -a "$TAG" -m "Release $TAG"
 
 if [ "$PUSH" = true ]; then
   if git remote | grep -q '^origin$'; then

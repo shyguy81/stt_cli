@@ -13,6 +13,7 @@ use symphonia::core::{
 use whisper_rs::{FullParams, SamplingStrategy, WhisperContext, WhisperContextParameters};
 
 #[derive(Parser, Debug)]
+#[command(version = env!("CARGO_PKG_VERSION"))]
 struct Args {
     /// Modèle Whisper ggml (ex: ggml-base.bin)
     #[arg(long)]
